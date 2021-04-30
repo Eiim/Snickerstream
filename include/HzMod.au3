@@ -126,8 +126,15 @@ Func _HzModReadImage($iSocket, $dReadahead = -1)
 
 		Case $sTargaPacket
 			LogLine("TARGA Image detected", 1)
-			MsgBox(16,"Oops!","Snickerstream currently does not support TARGA streams. Choose another game and reconnect.")
-			Exit 1
+			While $iNumBytesRead<$iImageSize
+				$iNumBytesRead += BinaryLen($dRecv)
+				$aRetArr[1] += $dRecv
+				$dRecv = TCPRecv($iSocket,$iMaxBytes,1)
+				If $bStreaming == False Then Return -1
+				LogLine("$dRecv: "&$dRecv, 3)
+			WEnd
+			LogLine(BinaryMid($aRetArr[1],$iImageSize-7) + $dRecv, 1)
+			LogLine("TARGA Image complete?", 1)
 		Case Else
 			LogLine("Unknown packet received with ID "&$dType, 1)
 	EndSwitch
