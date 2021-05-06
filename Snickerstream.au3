@@ -359,7 +359,7 @@ Func StreamingLoop()
 			If $bUseNTR==False Then $dReadahead=$aJpeg[2]
 			$iFPS += 1
 			If $bD2D == True Then
-				If $iSubImgNum == 0 Or $iSubImgNum == $iImgNum Then $oBitmap = __D2D_LoadImageFromMemory($aJpeg[1], $aJpeg[0], $bUseNTR) ;Create a D2D image from the image that's stored in memory
+				If $iSubImgNum == 0 Or $iSubImgNum == $iImgNum Then $oBitmap = __D2D_LoadImageFromMemory($aJpeg[1], $aJpeg[0], $bUseNTR, $aJpeg[3]) ;Create a D2D image from the image that's stored in memory
 				If $aJpeg[0] == 1 And ($oBitmap[1] <> $iW3DSTop Or $iImgNum = 0) Then	;HzMod streaming is only supported for the top screen now. I'll have to change this later
 					$iImgNum = ($iW3DSTop/$oBitmap[1])-1
 					ReDim $aSubImages[$iImgNum]
@@ -474,9 +474,22 @@ Func __D2D_ScaleImageFactor($oScaleEffect, $oImage, $iScreen)
 	Return _D2D_Effect_GetOutput($oScaleEffect)
 EndFunc
 
-Func __D2D_LoadImageFromMemory($dData, $iScreen, $bSwapRB)
+Func __D2D_LoadImageFromMemory($dData, $iScreen, $bSwapRB, $HzTGA)
 	Local $aRet[2]
 	Local $oWIC_ImagingFactory = _WIC_ImagingFactory_Create()
+
+	; TGA Code will go here
+	If $HzTGA == 1 Then
+		$dll = DllOpen("include\TgaHz.dll")
+
+		DllCall($dll, "none", "Function")
+
+		$test = DllCall($dll, "int:cdecl", "Add", "int", 2, "int", 3)
+		MsgBox(0,"Error: " & @error,$test[0])
+
+		DllClose($dll)
+	EndIf
+
 
 	Local $tImage = DllStructCreate("byte Data[" & BinaryLen($dData) & "]")
 	$tImage.Data = $dData
