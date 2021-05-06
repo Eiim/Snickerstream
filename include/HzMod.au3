@@ -90,7 +90,7 @@ EndFunc
 
 Func _HzModReadImage($iSocket, $dReadahead = -1)
 	Local Const $iMaxBytes = 1360, $sJpegPacket = "0x04", $sTargaPacket = "0x03"
-	Local $aRetArr[3], $iIndex = 1, $iImageSize, $iNumBytesRead
+	Local $aRetArr[4], $iIndex = 1, $iImageSize, $iNumBytesRead
 	$aRetArr[0] = 1	;Set the screen to top - bottom screen streaming not supported yet
 	If $dReadahead == -1 Then
 		Local $dRecv = TCPRecv($iSocket,$iMaxBytes,1)
@@ -123,9 +123,10 @@ Func _HzModReadImage($iSocket, $dReadahead = -1)
 				LogLine("$dRecv: "&$dRecv, 3)
 			WEnd
 			$aRetArr[2] = BinaryMid($aRetArr[1],$iImageSize-7) + $dRecv
+			LogLine($aRetArr[2], 2)
+			$aRetArr[3] = 0 ;JPEG Packet
 
 		Case $sTargaPacket
-			LogLine("TARGA Image detected", 1)
 			While $iNumBytesRead<$iImageSize
 				$iNumBytesRead += BinaryLen($dRecv)
 				$aRetArr[1] += $dRecv
@@ -133,8 +134,9 @@ Func _HzModReadImage($iSocket, $dReadahead = -1)
 				If $bStreaming == False Then Return -1
 				LogLine("$dRecv: "&$dRecv, 3)
 			WEnd
-			LogLine(BinaryMid($aRetArr[1],$iImageSize-7) + $dRecv, 1)
-			LogLine("TARGA Image complete?", 1)
+			$aRetArr[2] = BinaryMid($aRetArr[1],$iImageSize-7) + $dRecv
+			$aRetArr[3] = 1 ;TGA Packet
+
 		Case Else
 			LogLine("Unknown packet received with ID "&$dType, 1)
 	EndSwitch
